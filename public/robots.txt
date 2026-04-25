@@ -1,0 +1,18 @@
+User-agent: *
+
+# Admin panel ve yönetim sayfaları indexlenmesin
+Disallow: /uraz/
+Disallow: /uraz
+
+# Giriş sayfaları
+Disallow: /login
+Disallow: /giris
+Disallow: /kayit
+Disallow: /kayit-ol
+Disallow: /odeme/
+
+# Auth endpoints
+Disallow: /auth/
+
+Allow: /
+Sitemap: https://www.cozsen.com/sitemap.xml
