@@ -58,7 +58,7 @@ export default function ParentsListPage() {
             .eq('parent_id', parent.id)
 
           if (relations && relations.length > 0) {
-            const studentIds = relations.map(r => r.student_id)
+            const studentIds = (relations as any[]).map(r => r.student_id)
             const { data: students } = await supabase
               .from('students')
               .select('id, first_name, last_name, is_active')
