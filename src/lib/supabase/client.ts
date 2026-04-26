@@ -7,7 +7,7 @@ export function createClient() {
   if (!url || !key) {
     console.error('Supabase environment variables are missing!')
     // Fallback or empty client to prevent crash during hydration
-    return {} as any 
+    return {} as any
   }
 
   return createBrowserClient(url, key)

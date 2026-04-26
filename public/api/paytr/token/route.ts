@@ -10,8 +10,24 @@ const PAYTR_MERCHANT_KEY = process.env.PAYTR_MERCHANT_KEY || ''
 const PAYTR_MERCHANT_SALT = process.env.PAYTR_MERCHANT_SALT || ''
 const PAYTR_API_URL = 'https://www.paytr.com/odeme/api/get-token'
 
+// Placeholder / eksik kimlik bilgisi kontrolü — ödeme sistemi kapatıldıysa erken dön
+function isPaytrConfigured(): boolean {
+  const placeholders = ['magaza_numaraniz', 'magaza_gizli_anahtar', 'magaza_gizli_tuz', '']
+  return (
+    !placeholders.includes(PAYTR_MERCHANT_ID) &&
+    !placeholders.includes(PAYTR_MERCHANT_KEY) &&
+    !placeholders.includes(PAYTR_MERCHANT_SALT)
+  )
+}
+
 export async function POST(request: NextRequest) {
   try {
+    if (!isPaytrConfigured()) {
+      return NextResponse.json(
+        { error: 'Ödeme sistemi şu an aktif değil. Lütfen daha sonra tekrar deneyin.' },
+        { status: 503 }
+      )
+    }
     const body = await request.json()
     const {
       packageId,
