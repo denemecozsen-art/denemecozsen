@@ -51,7 +51,7 @@ export default function ParentsListPage() {
     if (parentsData) {
       // Her veli için bağlı öğrencileri çek
       const enrichedParents = await Promise.all(
-        parentsData.map(async (parent) => {
+        (parentsData as Parent[]).map(async (parent: Parent) => {
           const { data: relations } = await supabase
             .from('parent_students')
             .select('student_id')
