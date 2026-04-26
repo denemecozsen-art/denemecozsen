@@ -18,7 +18,7 @@ export default function YeniSifrePage() {
 
   // Supabase hash'ten session oluştur (password reset token)
   useEffect(() => {
-    const { data: listener } = supabase.auth.onAuthStateChange((event) => {
+    const { data: listener } = supabase.auth.onAuthStateChange((event: any) => {
       if (event === 'PASSWORD_RECOVERY') {
         setSessionReady(true)
       }
