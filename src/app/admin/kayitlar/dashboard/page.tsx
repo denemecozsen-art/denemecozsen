@@ -26,6 +26,16 @@ export default function RegistrationDashboard() {
     fetchDashboardData()
   }, [])
 
+  interface Student {
+    id: string;
+    first_name: string;
+    last_name: string;
+    gender: string | null;
+    level_id: string | null;
+    created_at: string;
+    is_active: boolean;
+  }
+
   async function fetchDashboardData() {
     setLoading(true)
     
@@ -35,7 +45,7 @@ export default function RegistrationDashboard() {
        { count: activeStudents },
        { count: totalTeachers },
        { data: levels },
-       { data: students }
+       { data: rawStudents }
     ] = await Promise.all([
        supabase.from('students').select('*', { count: 'exact', head: true }),
        supabase.from('students').select('*', { count: 'exact', head: true }).eq('is_active', true),
@@ -44,7 +54,8 @@ export default function RegistrationDashboard() {
        supabase.from('students').select('id, first_name, last_name, gender, level_id, created_at, is_active').order('created_at', { ascending: false })
     ])
 
-    const totalClasses = levels?.length || 0
+    const students = (rawStudents || []) as Student[]
+    const totalClasses = (levels as any[])?.length || 0
     setStats({
        totalStudents: totalStudents || 0,
        activeStudents: activeStudents || 0,
@@ -52,11 +63,11 @@ export default function RegistrationDashboard() {
        totalClasses: totalClasses
     })
 
-    if (students && students.length > 0) {
+    if (students.length > 0) {
        // Gender distribution
-       const male = students.filter(s => s.gender === 'Erkek').length
-       const female = students.filter(s => s.gender === 'Kız').length
-       const none = students.filter(s => !s.gender).length
+       const male = students.filter((s: Student) => s.gender === 'Erkek').length
+       const female = students.filter((s: Student) => s.gender === 'Kız').length
+       const none = students.filter((s: Student) => !s.gender).length
        setGenderData({ male, female, none })
        
        setRecentStudents(students.slice(0, 5))
@@ -64,8 +75,8 @@ export default function RegistrationDashboard() {
 
     // Class distribution
     if (levels) {
-       const mappedClassData = levels.map(lvl => {
-          const studentCount = students?.filter(s => s.level_id === lvl.id).length || 0
+       const mappedClassData = (levels as any[]).map(lvl => {
+          const studentCount = students.filter((s: Student) => s.level_id === lvl.id).length || 0
           return { name: lvl.name, count: studentCount }
        })
        setClassData(mappedClassData)
