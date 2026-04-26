@@ -5,13 +5,17 @@ import { createClient } from '@supabase/supabase-js'
  * NEVER use this in the browser. NEVER expose this to the client.
  */
 export function createAdminClient() {
-  if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
-    throw new Error('Supabase Service Role Key eksik. .env dosyasını kontrol edin.')
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY
+
+  if (!url || !key) {
+    console.error('Supabase Admin environment variables are missing!')
+    return {} as any
   }
   
   return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY,
+    url,
+    key,
     {
       auth: {
         autoRefreshToken: false,

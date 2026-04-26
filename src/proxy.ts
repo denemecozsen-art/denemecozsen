@@ -40,7 +40,7 @@ function recordFailedAttempt(ip: string): void {
   }
 }
 
-export default async function middleware(request: NextRequest) {
+export default async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
 
   // ─── 1. Yaygın admin path'lerini 404'e at ──────────────────────────────
@@ -48,7 +48,8 @@ export default async function middleware(request: NextRequest) {
     (blocked) => pathname === blocked || pathname.startsWith(`${blocked}/`)
   )
   if (isBlockedPath) {
-    return NextResponse.rewrite(new URL('/404', request.url))
+    // Projede /404 sayfası olmadığı için rewrite yerine direkt 404 status dönüyoruz
+    return new NextResponse(null, { status: 404 })
   }
 
   // ─── 2. Admin panel path işleme ────────────────────────────────────────
@@ -66,10 +67,14 @@ export default async function middleware(request: NextRequest) {
       request: { headers: requestHeaders },
     })
 
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+    if (!url || !key) {
+      return NextResponse.next()
+    }
+
+    const supabase = createServerClient(url, key, {
         cookies: {
           getAll() { return request.cookies.getAll() },
           setAll(cookiesToSet) {
@@ -121,11 +126,11 @@ export default async function middleware(request: NextRequest) {
     // Rol kontrolü
     const userRole = user.app_metadata?.role ?? user.user_metadata?.role
     if (userRole !== 'admin' && userRole !== 'super_admin') {
-      // Admin olmayan kullanıcı — panel varlığını ele verme (Ugly chrome hatası yerine güvenli Next 404'ü göster)
-      return NextResponse.rewrite(new URL('/404', request.url))
+      // Yetkisiz erişim: direkt 404 status dönüyoruz
+      return new NextResponse(null, { status: 404 })
     }
 
-    // Yetkili kullanıcı: /uraz/* → /admin/* internal rewrite (URL kullanıcıda /uraz/* kalır)
+    // Yetkili kullanıcı: /uraz/* → /admin/* internal rewrite
     const internalPath = pathname.replace(adminBase, '/admin')
     const rewriteUrl = new URL(internalPath, request.url)
     rewriteUrl.search = request.nextUrl.search
@@ -147,10 +152,14 @@ async function updatePublicSession(request: NextRequest): Promise<NextResponse> 
 
   let response = NextResponse.next({ request: { headers: requestHeaders } })
 
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+  if (!url || !key) {
+    return response
+  }
+
+  const supabase = createServerClient(url, key, {
       cookies: {
         getAll() { return request.cookies.getAll() },
         setAll(cookiesToSet) {
