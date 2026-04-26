@@ -29,7 +29,7 @@ export default function MediaAdminPage() {
     
     if (data) {
       // Get Public URLs
-      const filesWithUrls = data.map(file => {
+      const filesWithUrls = (data as any[]).map(file => {
          const { data: urlData } = supabase.storage.from('media').getPublicUrl(file.name)
          return { ...file, publicUrl: urlData.publicUrl }
       })
