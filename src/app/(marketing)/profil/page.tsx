@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import OgrenciDashboardPage from '@/app/ogrenci/page'
 import VeliDashboardPage from '@/app/veli/page'
+import { ProfileGridDashboard } from '@/components/profile/profile-grid-dashboard'
 import { LogOut, Settings, Bell, ChevronLeft } from 'lucide-react'
 import Link from 'next/link'
 import { logout } from '@/app/auth/logout/actions'
@@ -89,24 +90,24 @@ export default async function ProfilPage(props: ProfilPageProps) {
             {/* Web'de transparan, mobilde kart görünümü */}
             <div className="bg-background md:bg-transparent rounded-[2rem] md:rounded-none p-4 sm:p-6 md:p-0 shadow-[0_8px_30px_rgb(0,0,0,0.06)] md:shadow-none border border-border/40 md:border-none min-h-[50vh]">
 
-               {/* The existing panels are injected here purely and elegantly */}
-               {role === 'parent' ? (
-                  <VeliDashboardPage />
-               ) : (
-                  <OgrenciDashboardPage searchParams={props.searchParams} />
-               )}
+               {/* MOBILE/TABLET: Grid Dashboard */}
+               <div className="md:hidden">
+                  <ProfileGridDashboard role={role || 'student'} />
+               </div>
+
+               {/* DESKTOP: Existing panels */}
+               <div className="hidden md:block">
+                  {role === 'parent' ? (
+                     <VeliDashboardPage />
+                  ) : (
+                     <OgrenciDashboardPage searchParams={props.searchParams} />
+                  )}
+               </div>
 
             </div>
 
-            {/* Mobile Extra Controls (e.g. Logout is at the bottom in mobile apps) */}
+            {/* Mobile Extra Controls */}
             <div className="md:hidden mt-6 pb-6">
-               <form action={logout}>
-                  <button type="submit" className="w-full bg-background border-2 border-destructive/20 text-destructive font-black py-4 rounded-[1.5rem] shadow-sm hover:bg-destructive/5 flex items-center justify-center gap-2 group transition-all active:scale-[0.98]">
-                     <LogOut className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
-                     Hesaptan Çıkış Yap
-                  </button>
-               </form>
-
                <div className="text-center mt-6">
                   <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Çözsen Deneme App Versiyon 1.0</span>
                </div>

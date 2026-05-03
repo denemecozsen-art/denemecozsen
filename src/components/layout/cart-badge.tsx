@@ -7,23 +7,26 @@ import { useState, useEffect } from "react"
 export function CartBadge() {
   const [cartCount, setCartCount] = useState(0)
 
-  // Simple cart count from localStorage
   useEffect(() => {
     const updateCount = () => {
       const cart = localStorage.getItem('cart')
       if (cart) {
         try {
           const items = JSON.parse(cart)
-          setCartCount(Array.isArray(items) ? items.length : 0)
+          if (Array.isArray(items)) {
+            setCartCount(items.reduce((sum: number, item: any) => sum + (item.qty || 1), 0))
+          } else {
+            setCartCount(0)
+          }
         } catch {
           setCartCount(0)
         }
+      } else {
+        setCartCount(0)
       }
     }
-    
+
     updateCount()
-    
-    // Listen for storage changes
     window.addEventListener('storage', updateCount)
     return () => window.removeEventListener('storage', updateCount)
   }, [])

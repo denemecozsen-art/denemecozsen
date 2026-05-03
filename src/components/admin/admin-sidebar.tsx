@@ -16,7 +16,8 @@ import {
   Users,
   Home,
   ClipboardList,
-  Package
+  Package,
+  Bell
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { buildAdminPath, ADMIN_PANEL_PATH } from "@/lib/admin-config"
@@ -93,10 +94,14 @@ const getAdminNav = (): NavItem[] => [
     icon: Newspaper,
     subItems: [
       { title: "Makale/Blog Yönetimi", href: buildAdminPath("/blog") },
+      { title: "Hero Slider", href: buildAdminPath("/ana-sayfa-yonetimi/slider") },
+      { title: "Instagram Gömme", href: buildAdminPath("/ana-sayfa-yonetimi/instagram") },
       { title: "Medya Gelişmiş Kütüphane", href: buildAdminPath("/medya") },
       { title: "Global SEO Metrikleri", href: buildAdminPath("/seo-ayarlari") },
     ],
   },
+
+  { title: "Bildirim Yönetimi", href: buildAdminPath("/bildirimler"), icon: Bell },
 
   { title: "Genel Sistem Ayarları", href: buildAdminPath("/ayarlar"), icon: Settings },
 ]

@@ -17,6 +17,21 @@ export function AddToCartWidget({ slugOrId, price, title }: AddToCartWidgetProps
     }
 
     const handleBuy = () => {
+        // Sepete ekle
+        const existingCart = localStorage.getItem('cart')
+        let cart = existingCart ? JSON.parse(existingCart) : []
+        if (!Array.isArray(cart)) cart = []
+
+        const existingIndex = cart.findIndex((item: any) => item.id === slugOrId)
+        if (existingIndex >= 0) {
+            cart[existingIndex].qty += qty
+        } else {
+            cart.push({ id: slugOrId, title, price, qty })
+        }
+
+        localStorage.setItem('cart', JSON.stringify(cart))
+        window.dispatchEvent(new Event('storage'))
+        // Doğrudan ödemeye git
         window.location.href = `/odeme?paket=${encodeURIComponent(title)}&tutar=${price * qty}&qty=${qty}&paket_id=${slugOrId}`
     }
 

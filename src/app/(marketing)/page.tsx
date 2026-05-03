@@ -9,6 +9,7 @@ import { LevelsPackagesSection } from "@/components/home/levels-packages-section
 import { BarChart, CheckCircle2, MapPin, Truck, ArrowRight, Calendar, Loader2 } from "lucide-react"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { HeroCarousel } from "@/components/home/hero-carousel"
+import { InstagramSection } from "@/components/home/instagram-section"
 import { createClient } from "@/lib/supabase/client"
 
 const faqs = [
@@ -41,10 +42,15 @@ export default function HomePage() {
         .order('published_at', { ascending: false, nullsFirst: false })
         .limit(3)
       
-      if (error) throw error
+      if (error) {
+        // Table may not exist yet — fail silently
+        setBlogPosts([])
+        return
+      }
       if (data) setBlogPosts(data)
-    } catch (err) {
-      console.error('Blog posts could not be fetched:', err)
+    } catch {
+      // Table may not exist yet — fail silently
+      setBlogPosts([])
     } finally {
       setBlogLoading(false)
     }
@@ -77,7 +83,7 @@ export default function HomePage() {
               </Link>
               <Link href="/erken-kayit">
                 <Button variant="outline" size="lg" className="w-full sm:w-auto h-14 px-8 text-lg font-semibold bg-background border-2 border-border">
-                  Erken Kayıt Ol
+                  Erken Kayıt Ol (2026-2027)
                 </Button>
               </Link>
             </div>
@@ -221,6 +227,9 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* INSTAGRAM SECTION */}
+      <InstagramSection />
 
       {/* FAQ SECTION */}
       <section className="bg-muted py-24">

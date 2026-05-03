@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Package, Search, Filter, Clock, CheckCircle2, XCircle, AlertCircle, ArrowRight } from "lucide-react"
+import { Package, Search, Filter, Clock, CheckCircle2, XCircle, AlertCircle, ArrowRight, Inbox, Truck, Ban } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
@@ -41,53 +41,98 @@ function OrderStatusBadge({ status }: { status: string }) {
   )
 }
 
+const STATUS_TABS = [
+  { key: '', label: 'Tümü', icon: Inbox },
+  { key: 'new', label: 'Yeni', icon: Package },
+  { key: 'confirmed', label: 'Onaylı', icon: CheckCircle2 },
+  { key: 'shipped', label: 'Kargoda', icon: Truck },
+  { key: 'delivered', label: 'Teslim', icon: CheckCircle2 },
+  { key: 'cancelled', label: 'İptal', icon: Ban },
+]
+
 export default async function AdminOrdersPage({
   searchParams,
 }: {
-  searchParams: { status?: string }
+  searchParams: Promise<{ status?: string }>
 }) {
+  const { status } = await searchParams
   const supabase = await createClient()
 
+  // Tüm siparişleri çek (sayım için)
+  const { data: allOrders } = await supabase
+    .from('orders')
+    .select('order_status, payment_status')
+    .order('created_at', { ascending: false })
+
+  const counts = {
+    all: allOrders?.length || 0,
+    new: allOrders?.filter(o => o.order_status === 'new').length || 0,
+    confirmed: allOrders?.filter(o => o.order_status === 'confirmed').length || 0,
+    shipped: allOrders?.filter(o => o.order_status === 'shipped').length || 0,
+    delivered: allOrders?.filter(o => o.order_status === 'delivered').length || 0,
+    cancelled: allOrders?.filter(o => o.order_status === 'cancelled' || o.payment_status === 'refunded').length || 0,
+  }
+
+  // Filtreli siparişleri çek
   let query = supabase
     .from('orders')
     .select('*')
     .order('created_at', { ascending: false })
 
-  if (searchParams.status) {
-    if (searchParams.status === 'pending') {
-      query = query.eq('payment_status', 'pending')
-    } else if (searchParams.status === 'cancelled') {
-      // İptal ve İadeler: hem cancelled hem refunded siparişleri göster
-      query = query.or('order_status.eq.canceled,payment_status.eq.refunded')
+  if (status) {
+    if (status === 'cancelled') {
+      query = query.or('order_status.eq.cancelled,payment_status.eq.refunded')
     } else {
-      query = query.eq('order_status', searchParams.status)
+      query = query.eq('order_status', status)
     }
   }
 
   const { data: orders, error } = await query
-
   const hasOrdersTable = error?.code !== '42P01'
 
-  let pageTitle = "Tüm Siparişler"
-  if (searchParams.status === 'pending') pageTitle = "Ödeme Bekleyen Siparişler"
-  if (searchParams.status === 'confirmed') pageTitle = "Onaylı Siparişler"
-  if (searchParams.status === 'shipped') pageTitle = "Kargodaki Siparişler"
-  if (searchParams.status === 'cancelled') pageTitle = "İptal ve İadeler"
-
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <div>
         <h2 className="text-3xl font-bold tracking-tight">Sipariş Yönetimi</h2>
-        <p className="text-muted-foreground">Tüm e-ticaret siparişlerini, PayTR ödemelerini ve kargo durumlarını takip edin.</p>
+        <p className="text-muted-foreground">Tüm siparişleri, ödemeleri ve kargo durumlarını takip edin. Durum değişiklikleri için onay gereklidir.</p>
+      </div>
+
+      {/* Durum Sekmeleri */}
+      <div className="flex flex-wrap gap-2">
+        {STATUS_TABS.map((tab) => {
+          const Icon = tab.icon
+          const isActive = (status || '') === tab.key
+          const count = counts[tab.key as keyof typeof counts] || counts.all
+          return (
+            <Link
+              key={tab.key}
+              href={buildAdminPath(`/siparisler${tab.key ? `?status=${tab.key}` : ''}`)}
+              className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold transition-all border ${
+                isActive
+                  ? 'bg-primary text-primary-foreground border-primary shadow-md'
+                  : 'bg-card text-muted-foreground border-border hover:border-primary/30 hover:text-foreground'
+              }`}
+            >
+              <Icon className="w-4 h-4" />
+              {tab.label}
+              <span className={`ml-1 text-xs px-2 py-0.5 rounded-full font-black ${
+                isActive ? 'bg-primary-foreground/20 text-primary-foreground' : 'bg-muted text-muted-foreground'
+              }`}>
+                {count}
+              </span>
+            </Link>
+          )
+        })}
       </div>
 
       <Card className="border-border shadow-sm">
         <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4">
           <div>
             <CardTitle className="text-xl flex items-center gap-2">
-              <Package className="w-5 h-5 text-primary" /> {pageTitle}
+              <Package className="w-5 h-5 text-primary" />
+              {STATUS_TABS.find(t => t.key === (status || ''))?.label || 'Tüm Siparişler'}
             </CardTitle>
-            <CardDescription>Toplam {orders?.length || 0} kayıt bulundu.</CardDescription>
+            <CardDescription>{orders?.length || 0} kayıt bulundu.</CardDescription>
           </div>
           <div className="flex items-center gap-2">
             <div className="relative">
@@ -102,11 +147,11 @@ export default async function AdminOrdersPage({
         <CardContent>
           {!hasOrdersTable ? (
             <div className="bg-destructive/10 text-destructive p-4 rounded-xl border border-destructive/20 mb-4 text-sm font-medium">
-              Veritabanında henüz "orders" tablosu bulunmuyor.
+              Veritabanında henüz &quot;orders&quot; tablosu bulunmuyor.
             </div>
           ) : !orders || orders.length === 0 ? (
             <div className="text-center py-12 text-muted-foreground border-2 border-dashed border-border rounded-xl">
-              Henüz kayıtlı sipariş bulunmuyor.
+              Bu durumda henüz sipariş bulunmuyor.
             </div>
           ) : (
             <div className="rounded-xl border overflow-hidden">
@@ -152,7 +197,7 @@ export default async function AdminOrdersPage({
                       <td className="px-4 py-3 text-center">
                         <Link href={buildAdminPath(`/siparisler/${order.id}`)}>
                           <Button variant="ghost" size="sm" className="h-8 text-xs font-bold">
-                            Detay
+                            Detay <ArrowRight className="w-3 h-3 ml-1" />
                           </Button>
                         </Link>
                       </td>

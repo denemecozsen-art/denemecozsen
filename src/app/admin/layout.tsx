@@ -3,6 +3,7 @@ import Link from "next/link"
 import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 import { AdminSidebar } from "@/components/admin/admin-sidebar"
+import { AdminMobileDrawer } from "@/components/admin/admin-mobile-drawer"
 import { headers } from "next/headers"
 import { buildAdminPath, ADMIN_PANEL_PATH } from "@/lib/admin-config"
 
@@ -53,17 +54,20 @@ export default async function AdminLayout({ children }: { children: ReactNode })
 
       {/* Main Content */}
       <main className="flex-1 md:ml-72 flex flex-col min-h-screen">
-        <header className="h-16 border-b bg-background flex items-center px-6 justify-between shadow-sm sticky top-0 z-40">
-          <h1 className="font-extrabold text-lg max-md:hidden tracking-tight text-foreground">
-            Sistem Yönetimi{" "}
-            <span className="text-muted-foreground font-medium ml-2 text-sm">
-              / {userEmail.split('@')[0]}
-            </span>
-          </h1>
+        <header className="h-16 border-b bg-background flex items-center px-4 md:px-6 justify-between shadow-sm sticky top-0 z-40">
+          <div className="flex items-center gap-3">
+            <AdminMobileDrawer />
+            <h1 className="font-extrabold text-lg max-md:hidden tracking-tight text-foreground">
+              Sistem Yönetimi{" "}
+              <span className="text-muted-foreground font-medium ml-2 text-sm">
+                / {userEmail.split('@')[0]}
+              </span>
+            </h1>
+          </div>
           {/* Mobile logo */}
           <Link
             href={adminBase}
-            className="font-bold text-xl text-primary tracking-tight md:hidden flex items-center gap-2"
+            className="font-bold text-lg text-primary tracking-tight md:hidden flex items-center gap-2"
           >
             ÇÖZSEN LMS
           </Link>

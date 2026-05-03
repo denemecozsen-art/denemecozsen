@@ -3,9 +3,10 @@ import { siteConfig } from "@/content/site";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/server";
 import { User, LogOut, ShoppingCart } from "lucide-react";
-import { logout } from "@/app/auth/logout/actions";
 import { MobileDrawerWrapper } from "@/components/layout/mobile-drawer-wrapper";
 import { CartBadge } from "@/components/layout/cart-badge";
+import { LogoutButton } from "@/components/layout/logout-button";
+import { NotificationBell } from "@/components/layout/notification-bell";
 
 export async function SiteHeader() {
   const supabase = await createClient();
@@ -53,6 +54,7 @@ export async function SiteHeader() {
           
           {user ? (
             <div className="flex items-center space-x-2 sm:space-x-3">
+              <NotificationBell />
               <Link href="/profil" className="flex items-center space-x-2 bg-muted hover:bg-muted/80 pl-1 pr-3 py-1 rounded-full transition-colors cursor-pointer border border-border">
                 <div className="w-7 h-7 bg-primary text-primary-foreground rounded-full flex items-center justify-center">
                   <User className="w-4 h-4" />
@@ -61,11 +63,7 @@ export async function SiteHeader() {
                   {user.email?.split('@')[0]}
                 </span>
               </Link>
-              <form action={logout}>
-                <Button type="submit" variant="ghost" size="icon" className="text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors shrink-0" title="Güvenli Çıkış Yap">
-                   <LogOut className="w-5 h-5" />
-                </Button>
-              </form>
+              <LogoutButton />
             </div>
           ) : (
             <div className="hidden md:flex items-center space-x-2">
