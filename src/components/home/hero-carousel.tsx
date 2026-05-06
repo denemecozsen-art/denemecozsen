@@ -32,6 +32,15 @@ export function HeroCarousel() {
   const [slides, setSlides] = useState<HeroSlide[]>([])
   const [loading, setLoading] = useState(true)
 
+  // Validates link_url: must start with http(s):// or / to be safe
+  const getValidSlideHref = (url: string | null): string | null => {
+    if (!url) return null
+    const trimmed = url.trim()
+    if (trimmed === '#' || trimmed === '') return null
+    if (trimmed.startsWith('http://') || trimmed.startsWith('https://') || trimmed.startsWith('/')) return trimmed
+    return null
+  }
+
   useEffect(() => {
     fetchSlides()
   }, [])
@@ -73,27 +82,40 @@ export function HeroCarousel() {
     >
       <CarouselContent>
         {displaySlides ? (
-          displaySlides.map((slide) => (
-            <CarouselItem key={slide.id}>
-              <Link href={slide.link_url || '#'} className="block relative w-full pb-4 pr-4 pl-4 pt-4">
-                <div className="absolute inset-0 bg-primary/10 rounded-3xl transform rotate-2 scale-105"></div>
-                <div className="relative rounded-3xl shadow-xl border-4 border-white/20 overflow-hidden aspect-video">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={slide.image_url}
-                    alt={slide.title || 'Slide'}
-                    className="w-full h-full object-cover"
-                  />
-                  {(slide.title || slide.subtitle) && (
-                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-6 pt-16">
-                      {slide.title && <h3 className="text-white text-xl md:text-2xl font-bold">{slide.title}</h3>}
-                      {slide.subtitle && <p className="text-white/80 text-sm md:text-base mt-1">{slide.subtitle}</p>}
-                    </div>
-                  )}
-                </div>
-              </Link>
-            </CarouselItem>
-          ))
+          displaySlides.map((slide) => {
+            const href = getValidSlideHref(slide.link_url)
+            const content = (
+              <div className="relative rounded-3xl shadow-xl border-4 border-white/20 overflow-hidden aspect-video">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={slide.image_url}
+                  alt={slide.title || 'Slide'}
+                  className="w-full h-full object-cover"
+                />
+                {(slide.title || slide.subtitle) && (
+                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-6 pt-16">
+                    {slide.title && <h3 className="text-white text-xl md:text-2xl font-bold">{slide.title}</h3>}
+                    {slide.subtitle && <p className="text-white/80 text-sm md:text-base mt-1">{slide.subtitle}</p>}
+                  </div>
+                )}
+              </div>
+            )
+            return (
+              <CarouselItem key={slide.id}>
+                {href ? (
+                  <Link href={href} className="block relative w-full pb-4 pr-4 pl-4 pt-4">
+                    <div className="absolute inset-0 bg-primary/10 rounded-3xl transform rotate-2 scale-105"></div>
+                    {content}
+                  </Link>
+                ) : (
+                  <div className="relative w-full pb-4 pr-4 pl-4 pt-4">
+                    <div className="absolute inset-0 bg-primary/10 rounded-3xl transform rotate-2 scale-105"></div>
+                    {content}
+                  </div>
+                )}
+              </CarouselItem>
+            )
+          })
         ) : (
           <>
             {/* Slide 1 - Current Laptop Mockup */}

@@ -15,4 +15,4 @@ Disallow: /odeme/
 Disallow: /auth/
 
 Allow: /
-Sitemap: https://www.cozsen.com/sitemap.xml
+Sitemap: https://www.denemecozsen.com/sitemap.xml

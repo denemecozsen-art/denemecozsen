@@ -11,6 +11,7 @@ const navItems = [
   { href: '/profile/ogrenci/sonuclarim', label: 'Karnelerim', icon: Award, color: 'text-amber-600', bg: 'bg-amber-50', exact: false },
   { href: '/profile/ogrenci/analizlerim', label: 'Analizler', icon: BarChart3, color: 'text-emerald-600', bg: 'bg-emerald-50', exact: false },
   { href: '/profile/ogrenci/mesajlar', label: 'Mesajlar', icon: MessageSquare, color: 'text-sky-600', bg: 'bg-sky-50', exact: false },
+  { href: '/profile/ogrenci/profil', label: 'Hesabım', icon: UserCircle, color: 'text-slate-600', bg: 'bg-slate-50', exact: false },
 ]
 
 export default function OgrenciLayout({ children }: { children: React.ReactNode }) {
@@ -90,7 +91,7 @@ export default function OgrenciLayout({ children }: { children: React.ReactNode 
         {/* Bottom actions */}
         <div className="border-t border-slate-100 p-3 space-y-0.5 shrink-0">
           <Link
-            href="/profile/ogrenci/hesabim"
+            href="/profile/ogrenci/profil"
             onClick={() => setMobileOpen(false)}
             className="group flex items-center gap-3 w-full px-3 py-2.5 rounded-xl font-semibold text-sm text-slate-500 hover:bg-slate-50 hover:text-slate-800 transition-all"
           >

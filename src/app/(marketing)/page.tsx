@@ -39,7 +39,7 @@ export default function HomePage() {
         .from('blog_posts')
         .select('*')
         .eq('status', 'published')
-        .order('published_at', { ascending: false, nullsFirst: false })
+        .order('published_at', { ascending: false })
         .limit(3)
       
       if (error) {

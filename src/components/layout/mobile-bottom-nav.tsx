@@ -29,7 +29,7 @@ export function MobileBottomNav() {
   const isActive = (href: string) => pathname === href || pathname.startsWith(`${href}/`)
 
   return (
-    <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-background/90 backdrop-blur-xl border-t border-border/60 pb-safe shadow-[0_-8px_30px_rgba(0,0,0,0.06)]">
+    <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-background/90 backdrop-blur-xl border-t border-border/60 pb-safe shadow-[0_-8px_30px_rgba(0,0,0,0.06)]" style={{ transform: 'translateZ(0)', willChange: 'transform' }}>
       <div className="flex items-center justify-around px-2 py-2">
         {/* 1. Paketler */}
         <Link

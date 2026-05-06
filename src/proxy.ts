@@ -43,12 +43,19 @@ function recordFailedAttempt(ip: string): void {
 export default async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
 
-  // ─── 1. Yaygın admin path'lerini 404'e at ──────────────────────────────
-  const isBlockedPath = BLOCKED_ADMIN_PATHS.some(
+  // ─── 1. Yaygın admin path'lerini yönlendir veya 404'e at ────────────────
+  // /admin ve /admin/* → gerçek admin paneline (güvenlik: direkt erişim değil, rewrite ile)
+  if (pathname === '/admin' || pathname.startsWith('/admin/')) {
+    const realPath = pathname.replace('/admin', `/${ADMIN_PANEL_PATH}`) || `/${ADMIN_PANEL_PATH}`
+    const redirectUrl = new URL(realPath, request.url)
+    redirectUrl.search = request.nextUrl.search
+    return NextResponse.redirect(redirectUrl)
+  }
+
+  const isBlockedPath = BLOCKED_ADMIN_PATHS.filter(b => b !== '/admin').some(
     (blocked) => pathname === blocked || pathname.startsWith(`${blocked}/`)
   )
   if (isBlockedPath) {
-    // Projede /404 sayfası olmadığı için rewrite yerine direkt 404 status dönüyoruz
     return new NextResponse(null, { status: 404 })
   }
 
